@@ -1,0 +1,196 @@
+﻿**********************
+Начало записи сценария Windows PowerShell
+Время начала: 20261117144636
+Имя пользователя: YEVGENII\kyrlu
+Запуск от имени пользователя: YEVGENII\kyrlu
+Имя конфигурации: 
+Компьютер: YEVGENII (Microsoft Windows NT 10.0.26200.0)
+Ведущее приложение: powershell.exe -NoExit -ExecutionPolicy Bypass -File C:\Program Files\JetBrains\PyCharm 2025.3.1\plugins\terminal\shell-integrations\powershell\powershell-integration.ps1
+ИД процесса: 19928
+PSVersion: 5.1.26100.9818
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9818
+BuildVersion: 10.0.26100.9818
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Транскрибирование запущено, выходной файл logs/E4.txt
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-primary redis-cli INFO replication
+master_repl_offset:7678
+second_repl_offset:2076
+repl_backlog_active:1
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:2076
+repl_backlog_histlen:5603
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-replica redis-cli INFO replication
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+(.venv)
+]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-primary redis-cli GET counter
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-replica redis-cli GET counter
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>clear
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose stop redis-primary
+[+] stop 1/1
+ ✔ Container pythonproject4-redis-primary-1 Stopped                                                                                                                             0.4s
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>curl.exe -i "http://127.0.0.1:5000/counter?from=replica"
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.9 Python/3.13.12
+Date: Tue, 17 Nov 2026 09:47:10 GMT
+Content-Type: application/json
+Content-Length: 33
+Connection: close
+
+{"source":"replica","value":114}
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>curl.exe -i -X POST "http://127.0.0.1:5000/counter/increment"
+
+PS>TerminatingError(): "Конвейерная обработка была остановлена."
+>> TerminatingError(): "Конвейерная обработка была остановлена."
+(.venv)
+]1341;command_finished;exit_code=1;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>curl.exe -i "http://127.0.0.1:5000/counter?from=primary"
+
+PS>TerminatingError(): "Конвейерная обработка была остановлена."
+>> TerminatingError(): "Конвейерная обработка была остановлена."
+(.venv)
+]1341;command_finished;exit_code=1;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>clear
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-replica redis-cli REPLICAOF NO ONE
+OK
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-replica redis-cli INFO replication
+# Replication
+role:master
+connected_slaves:0
+master_failover_state:no-failover
+master_replid:ad41ab4905139c9b75d042684430cbe318acfd69
+master_replid2:acb47fa83ba22d5ed16534bfd5b2211529ba9692
+master_repl_offset:7692
+second_repl_offset:7693
+repl_backlog_active:1
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:1
+repl_backlog_histlen:7692
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>curl.exe -i -X POST "http://127.0.0.1:5000/counter/increment"
+Date: Tue, 17 Nov 2026 09:48:23 GMT
+Content-Type: application/json
+Content-Length: 33
+Connection: close
+
+{"source":"primary","value":115}
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+(.venv)
+]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>curl.exe -i "http://127.0.0.1:5000/counter?from=primary"
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+(.venv)
+]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>curl.exe -i "http://127.0.0.1:5000/counter?from=replica"
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose start redis-primary
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-primary redis-cli INFO replication
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+(.venv)
+]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-replica redis-cli INFO replication
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-primary redis-cli GET counter
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+(.venv)
+]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-replica redis-cli GET counter
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>curl.exe -i -X POST "http://127.0.0.1:5000/counter/increment"
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+(.venv)
+]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>curl.exe -i "http://127.0.0.1:5000/counter?from=primary"
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+(.venv)
+]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>curl.exe -i "http://127.0.0.1:5000/counter?from=replica"
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-primary redis-cli REPLICAOF redis-replica 6379
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-primary redis-cli INFO replication
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+(.venv)
+]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-replica redis-cli INFO replication
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-primary redis-cli GET counter
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-replica redis-cli GET counter
+
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-primary redis-cli REPLICAOF NO ONE
+
+OK
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+(.venv)
+]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>docker compose exec redis-replica redis-cli REPLICAOF redis-primary 6379
+OK
+(.venv)
+]1341;command_finished;exit_code=0;current_directory=433A5C55736572735C6B79726C755C5079636861726D50726F6A656374735C507974686F6E50726F6A65637434]1341;prompt_startedPS C:\Users\kyrlu\PycharmProjects\PythonProject4> ]1341;prompt_finished
+PS>Stop-Transcript
+**********************
+Конец записи протокола Windows PowerShell
+Время окончания: 20261117145237
+**********************
