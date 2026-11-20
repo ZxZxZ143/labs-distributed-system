@@ -1,8 +1,8 @@
-# Laboratory Work 4 — Data Storage and Replication
+# Laboratory Work 5 — NoSQL, Fault Tolerance and Load Balancing
 
-**Specification version:** 3  
+**Specification version:** 4  
 **Course:** Distributed & Cloud Computing (Fall 2026–2027)  
-**Service:** Flask REST API on `http://127.0.0.1:5000`  
+**Service:** Flask REST API behind nginx on `http://127.0.0.1:18080` (configurable `LAB5_PORT`)  
 **Storage variant:** A-2 — RustFS (S3-compatible object storage)
 
 ## 1. Purpose and scope
@@ -67,7 +67,7 @@ The Compose replica uses `--replicaof redis-primary 6379`: `6379` is the **inter
 - S3 client/connection failures return `503`, not a fabricated successful write or read.
 - Objects are never written to the Flask service container or working directory. RustFS uses the `s3-data` Docker named volume.
 
-### 3.3 Redis counter endpoints (to be implemented in the next step)
+### 3.3 Redis counter endpoints (retained from Lab 4)
 
 | Method and path | Request | Success | Failure |
 |---|---|---|---|
@@ -136,3 +136,72 @@ Collect **observed**, not invented, measurements:
 Provide `app.py`, `requirements.txt`, `docker-compose.yml`, `spec.md` (this document), `logs/`, `screenshots/`, and a 1–2 page `report.pdf` in one archive named `Surname_FirstName_Lab4.zip`. In the development repository, Python sources are under `app/`; copy them to the **archive root** when packaging, as required by the submission format. Never include AWS access keys, virtual environments, or Docker volume data.
 
 The report must contain the E1–E4 results table and answers to all four reflection questions: container storage vs. object storage; replication lag/eventual consistency; suitable/unsuitable replica reads; manual vs. automatic failover and old-primary return behavior.
+
+
+## 7. Lab 5 extension (version 4, normative for this laboratory)
+
+Sections 1–6 preserve the Lab 4 contract and R1–R18 for traceability; their host-run
+architecture and manual Redis experiments are historical context. Lab 5 runs three
+stateless API replicas (`api1`, `api2`, `api3`) behind nginx, plus MongoDB 7 nodes
+`mongo1`, `mongo2`, `mongo3` in replica set `rs0`. Only nginx publishes a host port,
+loopback `18080` by default (`LAB5_PORT=8080` may override it on a free port).
+MongoDB volumes persist across container recreation; `down -v` intentionally erases
+this lab's data. An idempotent one-shot initializer waits for an elected primary.
+Legacy S3 and Redis services are retained under Compose profile `lab4`; API storage
+clients are initialized lazily so Lab 5 needs neither AWS credentials nor Lab 4 services.
+R4–R18 are not evaluated in Lab 5 and remain available with the legacy profile.
+
+### 7.1 Record API
+
+| Method/path | Input and types | Success | Errors |
+|---|---|---|---|
+| `POST /records` | JSON object, `text`: string, 0–65536 UTF-8 bytes | `201`: `id` canonical UUID string, `text` original string, `served_by` hostname string | `400` invalid JSON/object/type/size; `503` storage unavailable |
+| `GET /records/{id}` | Canonical UUID string | `200`: `id`, `text`, `served_by` with the same types | `400` malformed ID; `404` unknown UUID; `503` storage unavailable |
+
+Empty text is allowed. Validation happens before accessing MongoDB. Each create gets
+a fresh UUID; MongoDB `_id` is not exposed. A failed/ambiguous POST is not blindly
+replayed by nginx. Clients must not assume a 503 proves no write occurred.
+
+Writes use `w=majority` and a 2000 ms write-concern timeout. Reads use the primary
+and majority read concern. Driver retryable writes are disabled to expose the
+failover interval in experiments; application operation timeout is 3500 ms,
+server selection 1500 ms, connect 1000 ms and socket 2500 ms. All PyMongo errors
+become JSON `503 {"error":"storage unavailable"}`. This bounds request duration;
+it does not promise instantaneous responses or linearizability.
+
+### 7.2 New numbered requirements
+
+| ID | Requirement | Verification |
+|---|---|---|
+| R19 | Valid record creation returns 201, UUID, exact text and serving hostname; write acknowledged by a majority. | Round trip, driver configuration and failover reads |
+| R20 | Reading an acknowledged record through nginx returns 200 and exact content. | Create/read through independent requests |
+| R21 | Invalid record JSON, non-object payload, missing/non-string text returns 400. | Automated negative cases |
+| R22 | Empty text and exactly 65536 UTF-8 bytes are accepted; 65537+ bytes are rejected with 400. | Boundary and multibyte cases |
+| R23 | Malformed record ID returns 400; unknown valid UUID returns 404. | Negative reads |
+| R24 | Database access errors return JSON 503 within 5 seconds locally. | Failure probes for reads and writes; isolated driver-error tests |
+| R25 | Three MongoDB nodes reach one PRIMARY and two SECONDARY states. | rs.status capture before and after failures |
+| R26 | At least two of the three API hostnames answer 30 requests through nginx. | Distribution script |
+| R27 | While api2 is stopped for about 20 seconds, reads and writes continue with no failed probes; api2 never answers the stopped-window distribution. After restart all replicas become available. | Timestamped read/write probe and distributions |
+| R28 | After stopping the actual MongoDB primary, successful reads/writes resume within 30 seconds; previously acknowledged records survive. A temporary 503 interval is allowed and measured. | Dynamic primary detection, timeline and integrity checks |
+| R29 | At 10, 50 and 100 concurrent users for 60 seconds each, target p95 <= 500 ms, errors <= 1%, throughput >= 2 requests/s per user. | Mixed 3:1 time/create workload, raw per-request CSV, measured p50/p95/RPS |
+| R30 | Failure experiments record UTC timestamps, stop interval, first error, error counts by operation, recovery time, and reads/writes during and after failure; stopped resources are restarted even on test failure. | Repeatable bounded scripts and JSON summaries |
+
+### 7.3 Assumptions, decisions and risks
+
+1. Local Docker Engine with Compose v2, at least 8 GiB RAM and a free loopback port.
+   Shared host workloads affect timings: observed performance is not a production SLA.
+2. A majority (2/3) remains connected during primary failure. MongoDB elections can
+   pause primary reads and writes; majority acknowledgement prioritizes consistency
+   and prevents minority writes. Node-stop experiments illustrate election behavior,
+   not a complete simulation of an arbitrary network partition (CAP applies under partition).
+3. This is a trusted local educational network without MongoDB authentication or TLS.
+   MongoDB/API ports are never host-published. Deployment outside this host requires
+   authentication, TLS and network controls.
+4. A 3:1 GET /time to POST /records workload with 0.1–0.5 second think time is a closed
+   workload; increasing users may not saturate the server. Report saturation only if measured.
+5. nginx uses passive failure detection (`max_fails=1`, `fail_timeout=5s`) and retries
+   connection errors/timeouts/502 on remaining upstreams. `non_idempotent` retries are
+   not enabled. Container stop/start retains the address; after container recreation
+   restart nginx to refresh upstream DNS resolution.
+6. Student/group metadata must be confirmed rather than invented. Git-configured
+   identity is recorded as the technical author; missing academic metadata is explicit.
