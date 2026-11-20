@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import redis
 import os
 import socket
@@ -8,6 +10,10 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError
 from flask import Flask, jsonify, request
+from pymongo import MongoClient
+from pymongo.errors import PyMongoError
+from pymongo.read_concern import ReadConcern
+from pymongo.write_concern import WriteConcern
 
 app = Flask(__name__)
 
@@ -25,22 +31,23 @@ s3_config = Config(
     retries={"max_attempts": 1},
 )
 
-s3 = boto3.client(
-    "s3",
-    region_name=os.environ.get("AWS_REGION", "us-east-1"),
-    endpoint_url=ENDPOINT,
-    config=s3_config,
-)
+@lru_cache(maxsize=1)
+def get_s3():
+    # Lab 5 starts without AWS credentials or an S3 service.
+    return boto3.client(
+        "s3", region_name=os.environ.get("AWS_REGION", "us-east-1"),
+        endpoint_url=ENDPOINT, config=s3_config,
+    )
 
 
 def ensure_bucket():
     try:
-        s3.head_bucket(Bucket=BUCKET)
+        get_s3().head_bucket(Bucket=BUCKET)
     except ClientError as exc:
         code = exc.response["Error"]["Code"]
 
         if code in ("404", "NoSuchBucket", "NotFound"):
-            s3.create_bucket(Bucket=BUCKET)
+            get_s3().create_bucket(Bucket=BUCKET)
         else:
             raise
 
@@ -64,7 +71,7 @@ def get_time():
 def echo():
     data = request.get_json(silent=True)
 
-    if not data or "message" not in data:
+    if not isinstance(data, dict) or "message" not in data:
         return jsonify({
             "error": "field 'message' is required"
         }), 400
@@ -97,7 +104,7 @@ def save_file():
 
     try:
         ensure_bucket()
-        s3.put_object(
+        get_s3().put_object(
             Bucket=BUCKET,
             Key=key,
             Body=content,
@@ -129,7 +136,7 @@ def read_file(file_id):
     key = f"files/{file_id}.txt"
 
     try:
-        obj = s3.get_object(Bucket=BUCKET, Key=key)
+        obj = get_s3().get_object(Bucket=BUCKET, Key=key)
         content = obj["Body"].read().decode("utf-8")
 
     except ClientError as exc:
@@ -158,7 +165,7 @@ def read_file(file_id):
 
 
 
-# Lab 4 — Redis Replication
+# Lab 4 вЂ” Redis Replication
 
 REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
 
@@ -171,7 +178,7 @@ primary = redis.Redis(
 )
 
 replica = redis.Redis(
-    host=REDIS_HOST,
+    host=os.environ.get("REDIS_REPLICA_HOST", REDIS_HOST),
     port=int(os.environ.get("REDIS_REPLICA_PORT", "6380")),
     decode_responses=True,
     socket_connect_timeout=2,
@@ -218,6 +225,62 @@ def get_counter():
         "value": int(value or 0),
         "source": source
     }), 200
+
+
+# Lab 5: external majority-acknowledged record storage.
+MAX_RECORD_BYTES = 65536
+
+
+@lru_cache(maxsize=1)
+def get_records():
+    client = MongoClient(
+        os.environ.get("MONGO_URI", "mongodb://localhost:27017/?replicaSet=rs0"),
+        serverSelectionTimeoutMS=1500, connectTimeoutMS=1000,
+        socketTimeoutMS=2500, timeoutMS=3500,
+        retryWrites=False, retryReads=False,
+    )
+    return client["lab5"].get_collection(
+        "records", write_concern=WriteConcern(w="majority", wtimeout=2000),
+        read_concern=ReadConcern("majority"),
+    )
+
+
+def record_response(record):
+    return {"id": record["_id"], "text": record["text"],
+            "served_by": socket.gethostname()}
+
+
+@app.post("/records")
+def create_record():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or not isinstance(data.get("text"), str):
+        return jsonify({"error": "field 'text' must be a string"}), 400
+    if len(data["text"].encode("utf-8")) > MAX_RECORD_BYTES:
+        return jsonify({"error": "text exceeds 65536 UTF-8 bytes"}), 400
+    record = {"_id": str(uuid.uuid4()), "text": data["text"]}
+    try:
+        get_records().insert_one(record)
+    except PyMongoError:
+        app.logger.warning("MongoDB write unavailable")
+        return jsonify({"error": "storage unavailable"}), 503
+    return jsonify(record_response(record)), 201
+
+
+@app.get("/records/<record_id>")
+def get_record(record_id):
+    try:
+        if str(uuid.UUID(record_id)) != record_id:
+            raise ValueError()
+    except ValueError:
+        return jsonify({"error": "invalid record identifier"}), 400
+    try:
+        record = get_records().find_one({"_id": record_id})
+    except PyMongoError:
+        app.logger.warning("MongoDB read unavailable")
+        return jsonify({"error": "storage unavailable"}), 503
+    if record is None:
+        return jsonify({"error": "record not found"}), 404
+    return jsonify(record_response(record)), 200
 
 
 if __name__ == "__main__":

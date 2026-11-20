@@ -1,6 +1,85 @@
+name: lab5
+
+x-api: &api
+  image: lab5-api:local
+  build: ./app
+  environment: &api-env
+    MONGO_URI: mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=rs0
+    S3_ENDPOINT: http://s3:9000
+    AWS_ACCESS_KEY_ID: lab4user
+    AWS_SECRET_ACCESS_KEY: lab4password
+    AWS_EC2_METADATA_DISABLED: "true"
+    REDIS_HOST: redis-primary
+    REDIS_PRIMARY_PORT: "6379"
+    REDIS_REPLICA_HOST: redis-replica
+    REDIS_REPLICA_PORT: "6379"
+  depends_on:
+    mongo-init:
+      condition: service_completed_successfully
+  healthcheck:
+    test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:5000/time', timeout=2)"]
+    interval: 5s
+    timeout: 3s
+    retries: 12
+
+x-mongo: &mongo
+  image: mongo:7
+  command: [mongod, --replSet, rs0, --bind_ip_all]
+  healthcheck:
+    test: [CMD, mongosh, --quiet, --eval, "quit(db.adminCommand('ping').ok ? 0 : 1)"]
+    interval: 3s
+    timeout: 5s
+    retries: 30
 
 services:
+  mongo1:
+    <<: *mongo
+    volumes:
+      - mongo1-data:/data/db
+      - ./init-replica.js:/scripts/init-replica.js:ro
+  mongo2:
+    <<: *mongo
+    volumes: [mongo2-data:/data/db]
+  mongo3:
+    <<: *mongo
+    volumes: [mongo3-data:/data/db]
+  mongo-init:
+    image: mongo:7
+    depends_on:
+      mongo1:
+        condition: service_healthy
+      mongo2:
+        condition: service_healthy
+      mongo3:
+        condition: service_healthy
+    volumes:
+      - ./init-replica.js:/scripts/init-replica.js:ro
+    entrypoint: [mongosh, --quiet, --host, mongo1:27017, /scripts/init-replica.js]
+    restart: "no"
+  api1:
+    <<: *api
+    hostname: api1
+  api2:
+    <<: *api
+    hostname: api2
+  api3:
+    <<: *api
+    hostname: api3
+  nginx:
+    image: nginx:1.27-alpine
+    ports: ["127.0.0.1:${LAB5_PORT:-18080}:80"]
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api1:
+        condition: service_healthy
+      api2:
+        condition: service_healthy
+      api3:
+        condition: service_healthy
+
   s3:
+    profiles: [lab4]
     image: rustfs/rustfs:1.0.0
     environment:
       RUSTFS_ACCESS_KEY: lab4user
@@ -9,29 +88,27 @@ services:
       RUSTFS_ADDRESS: "0.0.0.0:9000"
       RUSTFS_CONSOLE_ADDRESS: "0.0.0.0:9001"
       RUSTFS_VOLUMES: /data
-    ports:
-      - "127.0.0.1:9000:9000"
-      - "127.0.0.1:9001:9001"
     volumes:
       - s3-data:/data
     restart: unless-stopped
 
 
   redis-primary:
+    profiles: [lab4]
     image: redis:7
-    ports:
-      - "127.0.0.1:16379:6379"
     restart: unless-stopped
 
   redis-replica:
+    profiles: [lab4]
     image: redis:7
     command: [ "redis-server", "--replicaof", "redis-primary", "6379" ]
-    ports:
-      - "127.0.0.1:16380:6379"
     depends_on:
       - redis-primary
     restart: unless-stopped
 
 
 volumes:
+  mongo1-data:
+  mongo2-data:
+  mongo3-data:
   s3-data:
