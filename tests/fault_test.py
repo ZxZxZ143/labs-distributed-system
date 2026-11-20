@@ -116,7 +116,11 @@ def run(base, scenario):
     recovered_ok = all(v["seconds_from_stop"] is not None and v["seconds_from_stop"] <= 30 for v in events["operation_recovery"].values())
     restored_ok = all(events["phase_results"]["restored"][op] and set(events["phase_results"]["restored"][op]) == {str(code)} for op, code in (("read", 200), ("write", 201)))
     stopped_ok = all(events["phase_results"]["stopped"][op].get(str(code), 0) > 0 for op, code in (("read", 200), ("write", 201)))
-    events["pass"] = not integrity_errors and recovered_ok and restored_ok and stopped_ok and events["max_latency_ms"] < 5000
+    cluster_ok = Counter(m["state"] for m in events["final_cluster_state"]) == Counter({"PRIMARY": 1, "SECONDARY": 2})
+    events["pass"] = (not integrity_errors and recovered_ok and restored_ok and stopped_ok
+                      and events["max_latency_ms"] < 5000 and cluster_ok
+                      and set(events["restored_distribution"]) == {"api1", "api2", "api3"}
+                      and all(r["status"] == 503 and json.loads(r["error"]) == {"error": "storage unavailable"} for r in failures))
     if scenario == "api":
         events["pass"] = events["pass"] and not failures and "api2" not in events["stopped_distribution"]
     (logs / ("fault_" + name + ".json")).write_text(json.dumps(events, indent=2), encoding="utf-8")

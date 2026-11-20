@@ -1,81 +1,105 @@
-# Лабораторная работа № 3 — Docker и Kubernetes
+# Laboratory Work 5 — NoSQL, Fault Tolerance and Load Balancing
 
-Учебный проект по дисциплине Distributed Systems: контейнеризация Flask REST API, запуск через Docker Compose и развёртывание нескольких реплик в Kubernetes.
+Student: kurlykov yevgenii
 
-## Цель и реализация
+Three stateless Flask API replicas run behind nginx. MongoDB 7 stores records in a
+three-node replica set with majority write acknowledgement and automatic primary
+election. The specification is [spec.md](spec.md), version 4; measured results and
+answers to the defence questions are in [test_report.md](test_report.md).
 
-Приложение не хранит состояние и слушает порт 5000. Эндпоинт `GET /time` возвращает поля `time` и `served_by` (hostname контейнера или pod). По `served_by` можно наблюдать распределение запросов. Эндпоинт `POST /echo` возвращает переданное поле `message`; отсутствие поля даёт HTTP 400.
+## Requirements and launch
 
-| Файл | Назначение |
-|---|---|
-| `app/app.py` | REST API v2 |
-| `app/requirements.txt` | Зависимости Python |
-| `app/Dockerfile` | Образ на базе Python 3.12 slim |
-| `docker-compose.yml` | Запуск API с публикацией порта 5000 |
-| `k8s/deployment.yaml` | Deployment `my-api`, 3 реплики |
-| `k8s/service.yaml` | NodePort Service: порт 80 → 5000 |
-| [spec.md](spec.md) | Спецификация |
-| [Lab3_Reflection_Report.pdf](Lab3_Reflection_Report.pdf) | Отчёт |
-| [screenshots/](screenshots/) | Скриншоты экспериментов |
+Docker Engine + Compose v2, Python 3.12 or 3.13, at least 8 GiB RAM and a free
+loopback port `18080`. The submission was measured on a shared Windows host with
+Docker Desktop (12 virtual CPUs, 7.36 GiB available to Docker).
 
-Файлы `broker.py`, `producer.py`, `consumer.py` сохранены из Lab 2 для справки и не входят в контейнер или Kubernetes-развёртывание Lab 3.
-
-## Запуск через Docker Compose
-
-Требуются работающий Docker Engine и Docker Compose v2. Из корня проекта:
-
-```bash
-docker compose up --build -d
+```powershell
+docker compose up -d --build --wait --wait-timeout 180
 docker compose ps
+docker compose exec -T mongo1 mongosh --quiet --eval "rs.status().members.map(m => m.name + ' ' + m.stateStr)"
+Invoke-RestMethod http://127.0.0.1:18080/time
 ```
 
-Откройте http://localhost:5000/time. Для остановки:
+Compose automatically initializes `rs0` through `mongo-init` and waits for primary
+election. The init script is safe to run again:
 
-```bash
+```powershell
+docker compose exec -T mongo1 mongosh --quiet /scripts/init-replica.js
+```
+
+Only nginx publishes a port. MongoDB requires no local training password and is not
+published to the host. Default port `18080` avoids another project on `8080`.
+To use the assignment's example port instead: set `$env:LAB5_PORT='8080'` before
+starting Compose and `$env:BASE_URL='http://127.0.0.1:8080'` before pytest; pass
+`--base http://127.0.0.1:8080` to other scripts.
+
+## Tests and repeatable experiments
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r app/requirements.txt -r requirements-test.txt
+New-Item -ItemType Directory -Force logs/lab5
+.venv\Scripts\python.exe -m pytest tests/test_api.py tests/test_storage_errors.py -v --junitxml=logs/lab5/pytest.xml
+.venv\Scripts\python.exe tests/load_test.py --users 10 --duration 60 --prefix logs/lab5/load_10
+.venv\Scripts\python.exe tests/load_test.py --users 50 --duration 60 --prefix logs/lab5/load_50
+.venv\Scripts\python.exe tests/load_test.py --users 100 --duration 60 --prefix logs/lab5/load_100
+.venv\Scripts\python.exe tests/fault_test.py api
+.venv\Scripts\python.exe tests/fault_test.py primary
+.venv\Scripts\python.exe tests/collect_evidence.py
+```
+
+On Linux/macOS use `.venv/bin/python` instead. Run these commands **sequentially**;
+load and failure experiments must not overlap. Fault tests only operate on Compose
+project `lab5`, detect the actual primary, stop the selected node immediately with
+`--timeout 0`, sample independent reads and writes, keep it stopped for about 20 s,
+and restore it in `finally`. The immediate stop models a crash rather than graceful
+primary stepdown. Every acknowledged probe write is reread after restoration.
+The scripts return a nonzero status when their specified checks fail.
+
+`tests/probe.py --duration 60` is also available as a standalone finite read/write
+probe (one request per operation every 0.5 s, or as soon as the previous request
+completes). `tests/locustfile.py` provides an optional equivalent Locust workload;
+the submitted load evidence uses `load_test.py`, explicitly permitted by the lab.
+The latter logs every latency and computes interpolated p50/p95, wall-clock RPS
+including request drain, failure count and percentage. The load starts all users
+together; it does not use Locust's ramp-up.
+
+Thirty-request distribution:
+
+```powershell
+1..30 | ForEach-Object { (Invoke-RestMethod http://127.0.0.1:18080/time).served_by } | Group-Object | Select-Object Name, Count
+```
+
+## Files and evidence
+
+- `docker-compose.yml`, `init-replica.js`, `nginx.conf`: the Lab 5 stack.
+- `app/`: API, image definition and dependencies; `/time` and `/echo` are retained.
+- `tests/`: functional, error, load and failure checks, evidence and archive helpers.
+- `logs/lab5/`: raw request CSVs, summaries, probe JSONL, JUnit and environment output.
+- `screenshots/lab5/`: screenshots of captured experiment evidence; see report links.
+- `test_report.md`: requirement traceability, actual numbers, timelines, CAP and recommendations.
+
+Existing `logs/E*.txt`, root screenshots, `exp/`, `k8s/` and queue examples are
+historical Labs 2–4 artifacts and are excluded from the Lab 5 archive.
+`docker-compose.lab4.yml` preserves the previous standalone Lab 4 configuration.
+Lab 4 storage endpoints remain in the API; optional `--profile lab4` enables S3
+and Redis dependencies internally. They are outside the Lab 5 test scope. Use
+`docker compose -p pythonproject4 -f docker-compose.lab4.yml ...` for the old
+host-based Lab 4 setup. Do not combine its experiments with Lab 5 measurements.
+
+## Stop and package
+
+```powershell
 docker compose down
+.venv\Scripts\python.exe tests/package_submission.py
 ```
 
-## Запуск в Kubernetes (Minikube)
+The archive is `dist/kurlykov_yevgenii_Lab5.zip`. It excludes Git, virtual environments,
+caches, private environment files and historical lab evidence. `down` preserves
+MongoDB volumes. `docker compose down -v` erases this lab's data permanently.
+After recreating an API container (as opposed to stop/start), restart nginx so
+its upstream hostnames resolve to the new container addresses.
 
-Требуются Docker, kubectl и Minikube.
-
-```bash
-minikube start
-docker build -t my-api:lab3 ./app
-minikube image load my-api:lab3
-kubectl apply -f k8s/
-kubectl rollout status deployment/my-api
-kubectl get pods -l app=my-api
-minikube service my-api --url
-```
-
-Используйте выведенный адрес Service, добавив `/time`. Если Minikube держит туннель в текущем терминале, оставьте его открытым и выполняйте запросы из другого.
-
-## Эксперименты
-
-1. Отправьте 30 отдельных запросов `GET /time` через Service и сравните `served_by`: ожидаются как минимум два разных pod; равномерное распределение не гарантируется.
-2. Получите имена pod командой `kubectl get pods -l app=my-api`, затем выполните `kubectl delete pod <имя-pod>`. Наблюдайте восстановление числа реплик командой `kubectl get pods -l app=my-api -w`.
-3. Увеличьте число реплик до пяти, затем верните три:
-
-```bash
-kubectl scale deployment my-api --replicas=5
-kubectl rollout status deployment/my-api
-kubectl get pods -l app=my-api
-kubectl scale deployment my-api --replicas=3
-kubectl rollout status deployment/my-api
-```
-
-4. Проверьте `POST /echo` с JSON `{"message":"Hello"}` (200) и без поля `message` (400).
-
-Скриншоты и PDF находятся по ссылкам выше. Наличие манифестов само по себе не подтверждает успешное выполнение экспериментов.
-
-## Очистка
-
-```bash
-kubectl delete -f k8s/
-minikube stop
-```
-
-## История ветки
-
-Ветка `lab3` создана на исходном коммите `0a80875` (`lab3`) с сохранением его предшествующей истории. README и перенос PDF-отчёта в корень добавлены отдельным коммитом.
+The work was prepared with Codex assistance. Dependencies: Flask, PyMongo,
+Gunicorn, nginx, MongoDB, requests, pytest; existing Lab 4 code also uses boto3 and
+Redis. The report distinguishes measurements from explanations and proposals.

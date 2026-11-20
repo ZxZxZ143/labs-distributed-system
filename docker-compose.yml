@@ -1,7 +1,6 @@
 name: lab5
 
 x-api: &api
-  image: lab5-api:local
   build: ./app
   environment: &api-env
     MONGO_URI: mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=rs0
