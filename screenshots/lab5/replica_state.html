@@ -1,0 +1,8 @@
+<!doctype html><meta charset='utf-8'><title>MongoDB replica set state</title><style>body{background:#101820;color:#e9f0f5;margin:32px;font:17px Consolas,monospace}h1{font:26px Arial;color:#9bd6ff}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}small{color:#adbdcc}</style><h1>MongoDB replica set state</h1><small>Lab 5 | kurlykov yevgenii | captured CLI / experiment results</small><pre>2026-11-20T16:35:59.300713+00:00
+$ docker compose exec -T mongo1 mongosh --quiet --eval rs.status().members...
+[
+  &#x27;mongo1:27017 PRIMARY&#x27;,
+  &#x27;mongo2:27017 SECONDARY&#x27;,
+  &#x27;mongo3:27017 SECONDARY&#x27;
+]
+</pre>

@@ -203,5 +203,6 @@ it does not promise instantaneous responses or linearizability.
    connection errors/timeouts/502 on remaining upstreams. `non_idempotent` retries are
    not enabled. Container stop/start retains the address; after container recreation
    restart nginx to refresh upstream DNS resolution.
-6. Student/group metadata must be confirmed rather than invented. Git-configured
-   identity is recorded as the technical author; missing academic metadata is explicit.
+6. Failure timelines use UTC and response-completion times; stop command request and
+   completion times are both retained. Sampling bounds recovery observations rather
+   than identifying the exact internal MongoDB election instant.

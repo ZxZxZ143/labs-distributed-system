@@ -1,0 +1,146 @@
+ Image lab5-api3 Building 
+ Image lab5-api2 Building 
+ Image lab5-api1 Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.47kB 0.1s done
+#1 DONE 0.1s
+
+#2 [api2 internal] load build definition from Dockerfile
+#2 transferring dockerfile: 296B 0.0s done
+#2 DONE 0.0s
+
+#3 [api1 internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 1.0s
+
+#4 [api3 internal] load .dockerignore
+#4 transferring context: 75B done
+#4 DONE 0.0s
+
+#5 [api3 internal] load build context
+#5 transferring context: 125B done
+#5 DONE 0.0s
+
+#6 [api3 1/5] FROM docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+#6 resolve docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b 0.0s done
+#6 DONE 0.1s
+
+#7 [api2 2/5] WORKDIR /app
+#7 CACHED
+
+#8 [api2 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#8 CACHED
+
+#9 [api2 3/5] COPY requirements.txt .
+#9 CACHED
+
+#10 [api2 5/5] COPY . .
+#10 CACHED
+
+#11 [api3] exporting to image
+#11 exporting layers done
+#11 exporting manifest sha256:5d2d71ea1a0372d331284884cf18c693f26e0e50e53556e4f9b771ddab8e86e5 0.0s done
+#11 exporting config sha256:b30052f139ca612572f9b6cadd2752b29955b8f21364718aad4caf1841a174c3 0.1s done
+#11 exporting attestation manifest sha256:8d569d2c4d08fa4fa0197a8903baa6f34c8afd8ee89494c8e1092a21ade014cd
+#11 exporting attestation manifest sha256:8d569d2c4d08fa4fa0197a8903baa6f34c8afd8ee89494c8e1092a21ade014cd 0.1s done
+#11 exporting manifest list sha256:0ff814cfc135364368d27ede5a05d0be4c99912b0e8a246c9b999ec74ab70c9c
+#11 exporting manifest list sha256:0ff814cfc135364368d27ede5a05d0be4c99912b0e8a246c9b999ec74ab70c9c 0.1s done
+#11 naming to docker.io/library/lab5-api3:latest 0.0s done
+#11 unpacking to docker.io/library/lab5-api3:latest
+#11 ...
+
+#12 [api2] exporting to image
+#12 exporting layers done
+#12 exporting manifest sha256:cc4c5386431abfc401950bdabd9a4e27d5163990692af8fc6c142cb5ef95330e 0.0s done
+#12 exporting config sha256:7550c72e84470326939dbf68b1bf4dd2f7de02a2daaea1ae44dfa71123ddf08d 0.1s done
+#12 exporting attestation manifest sha256:73026c2d1aee3e58cb3ce4589dea77fc9a3c561bb9d35741e43c86677e722a14 0.1s done
+#12 exporting manifest list sha256:8b7f359ea46f86ced8d39dbaa813e2020195e5dd9db77a43049ae580e89ef0be 0.1s done
+#12 naming to docker.io/library/lab5-api2:latest 0.0s done
+#12 unpacking to docker.io/library/lab5-api2:latest 5.4s done
+#12 DONE 5.9s
+
+#11 [api3] exporting to image
+#11 unpacking to docker.io/library/lab5-api3:latest 5.4s done
+#11 ...
+
+#13 [api1] exporting to image
+#13 exporting layers done
+#13 exporting manifest sha256:ad7c1ea60aaaabc90cd81cf999f98699cf66d6f333fb728d9af3e9f393234020 0.0s done
+#13 exporting config sha256:a47e43da57385c009c037cb97fe3f36a9f048df145174beba133713cc2b7a4be 0.0s done
+#13 exporting attestation manifest sha256:c96309369554a23ae37317600e0db2ff9621ae16c5acdb1d8974e92b0723a04c 0.1s done
+#13 exporting manifest list sha256:723046264b6e73a0fc963495d2cc86cf9023d6385b2287b516d3e0c884b31d22 0.1s done
+#13 naming to docker.io/library/lab5-api1:latest 0.0s done
+#13 unpacking to docker.io/library/lab5-api1:latest 5.4s done
+#13 DONE 5.9s
+
+#11 [api3] exporting to image
+#11 DONE 5.9s
+
+#14 [api2] resolving provenance for metadata file
+#14 DONE 0.2s
+
+#15 [api1] resolving provenance for metadata file
+#15 DONE 0.2s
+
+#16 [api3] resolving provenance for metadata file
+#16 DONE 0.0s
+ Image lab5-api1 Built 
+ Image lab5-api2 Built 
+ Image lab5-api3 Built 
+ Network lab5_default Creating 
+ Network lab5_default Created 
+ Volume lab5_mongo3-data Creating 
+ Volume lab5_mongo3-data Created 
+ Volume lab5_mongo2-data Creating 
+ Volume lab5_mongo2-data Created 
+ Volume lab5_mongo1-data Creating 
+ Volume lab5_mongo1-data Created 
+ Container lab5-mongo2-1 Creating 
+ Container lab5-mongo1-1 Creating 
+ Container lab5-mongo3-1 Creating 
+ Container lab5-mongo1-1 Created 
+ Container lab5-mongo2-1 Created 
+ Container lab5-mongo3-1 Created 
+ Container lab5-mongo-init-1 Creating 
+ Container lab5-mongo-init-1 Created 
+ Container lab5-api3-1 Creating 
+ Container lab5-api2-1 Creating 
+ Container lab5-api1-1 Creating 
+ Container lab5-api3-1 Created 
+ Container lab5-api1-1 Created 
+ Container lab5-api2-1 Created 
+ Container lab5-nginx-1 Creating 
+ Container lab5-nginx-1 Created 
+ Container lab5-mongo1-1 Starting 
+ Container lab5-mongo2-1 Starting 
+ Container lab5-mongo3-1 Starting 
+ Container lab5-mongo2-1 Started 
+ Container lab5-mongo3-1 Started 
+ Container lab5-mongo1-1 Started 
+ Container lab5-mongo2-1 Waiting 
+ Container lab5-mongo3-1 Waiting 
+ Container lab5-mongo1-1 Waiting 
+ Container lab5-mongo3-1 Healthy 
+ Container lab5-mongo2-1 Healthy 
+ Container lab5-mongo1-1 Healthy 
+ Container lab5-mongo-init-1 Starting 
+ Container lab5-mongo-init-1 Started 
+ Container lab5-mongo-init-1 Waiting 
+ Container lab5-mongo-init-1 Waiting 
+ Container lab5-mongo-init-1 Waiting 
+ Container lab5-mongo-init-1 Exited 
+ Container lab5-api2-1 Starting 
+ Container lab5-mongo-init-1 Exited 
+ Container lab5-api3-1 Starting 
+ Container lab5-mongo-init-1 Exited 
+ Container lab5-api1-1 Starting 
+ Container lab5-api3-1 Started 
+ Container lab5-api2-1 Started 
+ Container lab5-api1-1 Started 
+ Container lab5-api3-1 Waiting 
+ Container lab5-api1-1 Waiting 
+ Container lab5-api2-1 Waiting 
+ Container lab5-api1-1 Healthy 
+ Container lab5-api2-1 Healthy 
+ Container lab5-api3-1 Healthy 
+ Container lab5-nginx-1 Starting 
+ Container lab5-nginx-1 Started 

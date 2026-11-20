@@ -1,4 +1,4 @@
-# Laboratory Work 5 — NoSQL, Fault Tolerance and Load Balancing
+# Laboratory Work 5 вЂ” NoSQL, Fault Tolerance and Load Balancing
 
 Student: kurlykov yevgenii
 
@@ -9,7 +9,7 @@ answers to the defence questions are in [test_report.md](test_report.md).
 
 ## Requirements and launch
 
-Docker Engine + Compose v2, Python 3.12 or 3.13, at least 8 GiB RAM and a free
+Docker Engine + Compose v2, Python 3.12 or 3.13, at least 8 GB RAM (as recommended by the assignment) and a free
 loopback port `18080`. The submission was measured on a shared Windows host with
 Docker Desktop (12 virtual CPUs, 7.36 GiB available to Docker).
 
@@ -46,14 +46,16 @@ New-Item -ItemType Directory -Force logs/lab5
 .venv\Scripts\python.exe tests/fault_test.py api
 .venv\Scripts\python.exe tests/fault_test.py primary
 .venv\Scripts\python.exe tests/collect_evidence.py
+.venv\Scripts\python.exe tests/capture_screenshots.py
+.venv\Scripts\python.exe tests/build_report.py
 ```
 
 On Linux/macOS use `.venv/bin/python` instead. Run these commands **sequentially**;
 load and failure experiments must not overlap. Fault tests only operate on Compose
-project `lab5`, detect the actual primary, stop the selected node immediately with
-`--timeout 0`, sample independent reads and writes, keep it stopped for about 20 s,
-and restore it in `finally`. The immediate stop models a crash rather than graceful
-primary stepdown. Every acknowledged probe write is reread after restoration.
+project `lab5`, detect the actual primary, stop api2 with `--timeout 0` or kill the primary with `--signal SIGKILL`, sample independent reads and writes, keep it stopped for about 20 s,
+and restore it in `finally`. SIGKILL models a crash without graceful primary stepdown. A preliminary
+`stop --timeout 0` run had no observed 503 errors; it is retained under
+`logs/lab5/preliminary_primary_stop/`, separately from the definitive crash run. Every acknowledged probe write is reread after restoration.
 The scripts return a nonzero status when their specified checks fail.
 
 `tests/probe.py --duration 60` is also available as a standalone finite read/write
@@ -80,8 +82,9 @@ Thirty-request distribution:
 - `test_report.md`: requirement traceability, actual numbers, timelines, CAP and recommendations.
 
 Existing `logs/E*.txt`, root screenshots, `exp/`, `k8s/` and queue examples are
-historical Labs 2–4 artifacts and are excluded from the Lab 5 archive.
-`docker-compose.lab4.yml` preserves the previous standalone Lab 4 configuration.
+historical Labs 2вЂ“4 artifacts and are excluded from the Lab 5 archive.
+`docker-compose.lab4.yml` preserves the previous standalone Lab 4 configuration
+in the repository; that historical file is not part of the Lab 5 archive.
 Lab 4 storage endpoints remain in the API; optional `--profile lab4` enables S3
 and Redis dependencies internally. They are outside the Lab 5 test scope. Use
 `docker compose -p pythonproject4 -f docker-compose.lab4.yml ...` for the old
@@ -93,6 +96,10 @@ host-based Lab 4 setup. Do not combine its experiments with Lab 5 measurements.
 docker compose down
 .venv\Scripts\python.exe tests/package_submission.py
 ```
+
+Screenshots use Chrome/Edge/Chromium in an isolated headless profile to display the
+captured CLI and experiment evidence pages. They are screenshots of those pages,
+not a claim of a live terminal capture. The linked raw files remain the authority.
 
 The archive is `dist/kurlykov_yevgenii_Lab5.zip`. It excludes Git, virtual environments,
 caches, private environment files and historical lab evidence. `down` preserves

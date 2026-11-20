@@ -1,0 +1,11 @@
+<!doctype html><meta charset='utf-8'><title>Docker Compose services</title><style>body{background:#101820;color:#e9f0f5;margin:32px;font:17px Consolas,monospace}h1{font:26px Arial;color:#9bd6ff}pre{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}small{color:#adbdcc}</style><h1>Docker Compose services</h1><small>Lab 5 | kurlykov yevgenii | captured CLI / experiment results</small><pre>2026-11-20T16:35:59.300713+00:00
+$ docker compose ps
+NAME            IMAGE               COMMAND                  SERVICE   CREATED         STATUS                    PORTS
+lab5-api1-1     lab5-api1           &quot;gunicorn --bind 0.0…&quot;   api1      8 minutes ago   Up 7 minutes (healthy)    5000/tcp
+lab5-api2-1     lab5-api2           &quot;gunicorn --bind 0.0…&quot;   api2      8 minutes ago   Up 3 minutes (healthy)    5000/tcp
+lab5-api3-1     lab5-api3           &quot;gunicorn --bind 0.0…&quot;   api3      8 minutes ago   Up 7 minutes (healthy)    5000/tcp
+lab5-mongo1-1   mongo:7             &quot;docker-entrypoint.s…&quot;   mongo1    8 minutes ago   Up 2 minutes (healthy)    27017/tcp
+lab5-mongo2-1   mongo:7             &quot;docker-entrypoint.s…&quot;   mongo2    8 minutes ago   Up 34 seconds (healthy)   27017/tcp
+lab5-mongo3-1   mongo:7             &quot;docker-entrypoint.s…&quot;   mongo3    8 minutes ago   Up 7 minutes (healthy)    27017/tcp
+lab5-nginx-1    nginx:1.27-alpine   &quot;/docker-entrypoint.…&quot;   nginx     8 minutes ago   Up 7 minutes              127.0.0.1:18080-&gt;80/tcp
+</pre>

@@ -1,0 +1,112 @@
+{
+  "scenario": "primary",
+  "node": "mongo2",
+  "baseline_distribution": {
+    "api3": 10,
+    "api2": 10,
+    "api1": 10
+  },
+  "record_before_failure": {
+    "id": "bc625738-fdbe-46aa-87f4-f43e92661f2b",
+    "served_by": "api3",
+    "text": "acknowledged before primary_down"
+  },
+  "command": "docker compose -p lab5 kill --signal SIGKILL mongo2",
+  "stop_requested_utc": "2026-11-20T16:35:06.057+00:00",
+  "stopped_utc": "2026-11-20T16:35:06.857+00:00",
+  "stopped_distribution": {
+    "api2": 10,
+    "api1": 10,
+    "api3": 10
+  },
+  "elected_primary_while_stopped": "mongo1:27017",
+  "restart_requested_utc": "2026-11-20T16:35:28.402+00:00",
+  "restart_completed_utc": "2026-11-20T16:35:29.500+00:00",
+  "restored_distribution": {
+    "api1": 10,
+    "api3": 10,
+    "api2": 10
+  },
+  "errors_by_operation": {
+    "read": 3,
+    "write": 3
+  },
+  "total_errors": 6,
+  "first_error_utc": "2026-11-20T16:35:10.136+00:00",
+  "max_latency_ms": 3909.1474000015296,
+  "operation_recovery": {
+    "read": {
+      "first_error_utc": "2026-11-20T16:35:10.136+00:00",
+      "first_success_utc": "2026-11-20T16:35:18.203+00:00",
+      "seconds_from_stop": 12.146
+    },
+    "write": {
+      "first_error_utc": "2026-11-20T16:35:10.539+00:00",
+      "first_success_utc": "2026-11-20T16:35:18.208+00:00",
+      "seconds_from_stop": 12.151
+    }
+  },
+  "phase_results": {
+    "baseline": {
+      "read": {
+        "200": 10
+      },
+      "write": {
+        "201": 10
+      }
+    },
+    "stopping": {
+      "read": {
+        "200": 1,
+        "503": 1
+      },
+      "write": {
+        "201": 1,
+        "503": 1
+      }
+    },
+    "stopped": {
+      "read": {
+        "503": 2,
+        "200": 22
+      },
+      "write": {
+        "503": 2,
+        "201": 22
+      }
+    },
+    "restarting": {
+      "read": {
+        "200": 2
+      },
+      "write": {
+        "201": 2
+      }
+    },
+    "restored": {
+      "read": {
+        "200": 20
+      },
+      "write": {
+        "201": 19
+      }
+    }
+  },
+  "acknowledged_records_checked": 55,
+  "integrity_errors": [],
+  "final_cluster_state": [
+    {
+      "name": "mongo1:27017",
+      "state": "PRIMARY"
+    },
+    {
+      "name": "mongo2:27017",
+      "state": "SECONDARY"
+    },
+    {
+      "name": "mongo3:27017",
+      "state": "SECONDARY"
+    }
+  ],
+  "pass": true
+}

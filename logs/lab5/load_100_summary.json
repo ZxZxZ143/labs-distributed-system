@@ -1,0 +1,13 @@
+{
+  "users": 100,
+  "requested_duration_s": 60.0,
+  "elapsed_s": 60.05398999998579,
+  "request_count": 18536,
+  "failure_count": 0,
+  "median_ms": 13.030249974690378,
+  "p95_ms": 80.10322500194889,
+  "rps": 308.6555947407389,
+  "errors_pct": 0.0,
+  "workload": "3:1 GET /time : POST /records; think time uniform 0.1-0.5 s",
+  "pass": true
+}

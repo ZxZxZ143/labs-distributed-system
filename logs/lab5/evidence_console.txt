@@ -1,0 +1,20 @@
+[
+  'mongo1:27017 PRIMARY',
+  'mongo2:27017 SECONDARY',
+  'mongo3:27017 SECONDARY'
+]
+ NAME            IMAGE               COMMAND                  SERVICE   CREATED         STATUS                    PORTS
+lab5-api1-1     lab5-api1           "gunicorn --bind 0.0…"   api1      8 minutes ago   Up 7 minutes (healthy)    5000/tcp
+lab5-api2-1     lab5-api2           "gunicorn --bind 0.0…"   api2      8 minutes ago   Up 3 minutes (healthy)    5000/tcp
+lab5-api3-1     lab5-api3           "gunicorn --bind 0.0…"   api3      8 minutes ago   Up 7 minutes (healthy)    5000/tcp
+lab5-mongo1-1   mongo:7             "docker-entrypoint.s…"   mongo1    8 minutes ago   Up 2 minutes (healthy)    27017/tcp
+lab5-mongo2-1   mongo:7             "docker-entrypoint.s…"   mongo2    8 minutes ago   Up 34 seconds (healthy)   27017/tcp
+lab5-mongo3-1   mongo:7             "docker-entrypoint.s…"   mongo3    8 minutes ago   Up 7 minutes (healthy)    27017/tcp
+lab5-nginx-1    nginx:1.27-alpine   "/docker-entrypoint.…"   nginx     8 minutes ago   Up 7 minutes              127.0.0.1:18080->80/tcp
+ {"api3": 10, "api2": 10, "api1": 10} users | requests | errors | RPS | p50 ms | p95 ms | result
+   10 |     1923 |      0 |  32.05 |   6.27 |  26.84 | PASS
+   50 |     9580 |      0 | 159.60 |   7.77 |  34.97 | PASS
+  100 |    18536 |      0 | 308.66 |  13.03 |  80.10 | PASS
+
+Source: logs/lab5/load_*_summary.json
+Duration: 60 seconds each; custom load_test.py; raw request CSV retained.

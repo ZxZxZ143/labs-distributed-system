@@ -1,0 +1,32 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-8.4.2, pluggy-1.7.0 -- C:\Users\kyrlu\PycharmProjects\PythonProject4\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\kyrlu\PycharmProjects\PythonProject4
+collecting ... collected 23 items
+
+tests/test_api.py::test_R1_time PASSED                                   [  4%]
+tests/test_api.py::test_R2_echo PASSED                                   [  8%]
+tests/test_api.py::test_R3_echo_negative PASSED                          [ 13%]
+tests/test_api.py::test_R19_R20_R22_roundtrip[unicode] PASSED            [ 17%]
+tests/test_api.py::test_R19_R20_R22_roundtrip[empty] PASSED              [ 21%]
+tests/test_api.py::test_R19_R20_R22_roundtrip[max-ascii] PASSED          [ 26%]
+tests/test_api.py::test_R19_R20_R22_roundtrip[max-utf8] PASSED           [ 30%]
+tests/test_api.py::test_R21_invalid_payload[missing] PASSED              [ 34%]
+tests/test_api.py::test_R21_invalid_payload[null] PASSED                 [ 39%]
+tests/test_api.py::test_R21_invalid_payload[number] PASSED               [ 43%]
+tests/test_api.py::test_R21_invalid_payload[array] PASSED                [ 47%]
+tests/test_api.py::test_R21_invalid_payload[string] PASSED               [ 52%]
+tests/test_api.py::test_R21_invalid_payload[list-value] PASSED           [ 56%]
+tests/test_api.py::test_R21_malformed_json PASSED                        [ 60%]
+tests/test_api.py::test_R22_oversize[ascii] PASSED                       [ 65%]
+tests/test_api.py::test_R22_oversize[utf8] PASSED                        [ 69%]
+tests/test_api.py::test_R23_missing PASSED                               [ 73%]
+tests/test_api.py::test_R23_invalid_id PASSED                            [ 78%]
+tests/test_api.py::test_R26_distribution PASSED                          [ 82%]
+tests/test_storage_errors.py::test_R24_storage_errors[get-error0] PASSED [ 86%]
+tests/test_storage_errors.py::test_R24_storage_errors[get-error1] PASSED [ 91%]
+tests/test_storage_errors.py::test_R24_storage_errors[post-error0] PASSED [ 95%]
+tests/test_storage_errors.py::test_R24_storage_errors[post-error1] PASSED [100%]
+
+- generated xml file: C:\Users\kyrlu\PycharmProjects\PythonProject4\logs\lab5\pytest.xml -
+============================= 23 passed in 4.29s ==============================

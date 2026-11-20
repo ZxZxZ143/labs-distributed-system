@@ -1,0 +1,103 @@
+{
+  "scenario": "api",
+  "node": "api2",
+  "baseline_distribution": {
+    "api2": 10,
+    "api3": 10,
+    "api1": 10
+  },
+  "record_before_failure": {
+    "id": "f7894b45-468d-4514-b827-4d2470e0d3e5",
+    "served_by": "api2",
+    "text": "acknowledged before api_down"
+  },
+  "command": "docker compose -p lab5 stop --timeout 0 api2",
+  "stop_requested_utc": "2026-11-20T16:32:33.240+00:00",
+  "stopped_utc": "2026-11-20T16:32:35.502+00:00",
+  "stopped_distribution": {
+    "api1": 15,
+    "api3": 15
+  },
+  "restart_requested_utc": "2026-11-20T16:32:55.810+00:00",
+  "restart_completed_utc": "2026-11-20T16:33:02.068+00:00",
+  "restored_distribution": {
+    "api3": 10,
+    "api2": 10,
+    "api1": 10
+  },
+  "errors_by_operation": {},
+  "total_errors": 0,
+  "first_error_utc": null,
+  "max_latency_ms": 1030.0394000369124,
+  "operation_recovery": {
+    "read": {
+      "first_error_utc": null,
+      "first_success_utc": "2026-11-20T16:32:33.319+00:00",
+      "seconds_from_stop": 0.079
+    },
+    "write": {
+      "first_error_utc": null,
+      "first_success_utc": "2026-11-20T16:32:33.354+00:00",
+      "seconds_from_stop": 0.114
+    }
+  },
+  "phase_results": {
+    "baseline": {
+      "read": {
+        "200": 10
+      },
+      "write": {
+        "201": 10
+      }
+    },
+    "stopping": {
+      "read": {
+        "200": 5
+      },
+      "write": {
+        "201": 5
+      }
+    },
+    "stopped": {
+      "read": {
+        "200": 40
+      },
+      "write": {
+        "201": 37
+      }
+    },
+    "restarting": {
+      "read": {
+        "200": 12
+      },
+      "write": {
+        "201": 12
+      }
+    },
+    "restored": {
+      "read": {
+        "200": 20
+      },
+      "write": {
+        "201": 20
+      }
+    }
+  },
+  "acknowledged_records_checked": 85,
+  "integrity_errors": [],
+  "final_cluster_state": [
+    {
+      "name": "mongo1:27017",
+      "state": "PRIMARY"
+    },
+    {
+      "name": "mongo2:27017",
+      "state": "SECONDARY"
+    },
+    {
+      "name": "mongo3:27017",
+      "state": "SECONDARY"
+    }
+  ],
+  "pass": true
+}

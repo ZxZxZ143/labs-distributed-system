@@ -51,8 +51,9 @@ def run(base, scenario):
         node = raw.strip().split(":")[0]
         if node not in {"mongo1", "mongo2", "mongo3"}:
             raise RuntimeError("Unexpected primary: " + raw)
+    stop_args = ("kill", "--signal", "SIGKILL", node) if scenario == "primary" else ("stop", "--timeout", "0", node)
     events = dict(scenario=scenario, node=node, baseline_distribution=before,
-                  record_before_failure=record, command="docker compose -p lab5 stop --timeout 0 " + node)
+                  record_before_failure=record, command="docker compose -p lab5 " + " ".join(stop_args))
     with (logs / ("probe_" + name + ".txt")).open("w", encoding="utf-8") as output:
         probe = Probe(base, record, output)
         probe.start()
@@ -62,7 +63,7 @@ def run(base, scenario):
             probe.phase = "stopping"
             events["stop_requested_utc"] = utc()
             stopped = True  # set before command so errors still trigger restoration
-            compose("stop", "--timeout", "0", node)
+            compose(*stop_args)
             events["stopped_utc"] = utc()
             probe.phase = "stopped"
             events["stopped_distribution"] = distribution(base)
